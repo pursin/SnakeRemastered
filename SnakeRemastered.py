@@ -149,6 +149,8 @@ def game_logic():
     # Holds the snake's body (including head)
     body = []
     score = 0
+    difftick = TICK
+    increment = False
 
     # Stands for point x/y_axis, spawns initial point
     px_axis = random.randrange(1, (WINWIDTH / BOXSIZE)) * BOXSIZE
@@ -240,11 +242,20 @@ def game_logic():
             px_axis = random.randrange(1, (WINWIDTH // BOXSIZE)) * BOXSIZE
             py_axis = random.randrange(1, (WINHEIGHT // BOXSIZE)) * BOXSIZE
             score += 1
+
+            # Used in incrementing scoreline down below
+            if score % 5 == 0:
+                increment = True
             print('Score: ' + str(score))
 
         # Handles game speed
         # TODO: Increment FPS based on points/settings to mimic difficulty increase ?
-        fps.tick(TICK)
+        # Temporary solution: Increments fps by 5 every 5 points (not going to stay but pushing for fun)
+        if score % 5 == 0 and increment:
+            difftick += 5
+            increment = False
+        fps.tick(difftick)
+        print(difftick)
 
 
 # TODO: Better way to start the game

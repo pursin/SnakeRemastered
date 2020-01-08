@@ -21,6 +21,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (192, 192, 192)
 RED = (255, 0, 0)
+CYAN = (0, 255, 255)
 
 # Ensures there are no errors while initializing game
 precond = pygame.init()
@@ -153,6 +154,7 @@ def game_logic():
     # Holds the snake's body (including head)
     body = []
     score = 0
+    max_score = 0
 
     # Used for fps incrementer
     difftick = TICK
@@ -160,12 +162,15 @@ def game_logic():
 
     # Used for direction handling
     curr_dir = 'STOP'
-    next_dir = 'STOP'
 
     # Stands for point x/y_axis, spawns initial point
     px_axis = random.randrange(1, (WINWIDTH / BOXSIZE)) * BOXSIZE
     py_axis = random.randrange(1, (WINHEIGHT / BOXSIZE)) * BOXSIZE
     print('Point at: (' + str(px_axis) + ', ' + str(py_axis) + ')')
+
+    # Stands for non-point x/y_axis, spawns initial point
+    npx_axis = random.randrange(1, (WINWIDTH / BOXSIZE)) * BOXSIZE
+    npy_axis = random.randrange(1, (WINHEIGHT / BOXSIZE)) * BOXSIZE
 
     # Main loop for game, controls hitboxes, graphics, and keypresses
     while True:
@@ -180,7 +185,6 @@ def game_logic():
         keys = pygame.key.get_pressed()
         # Northwest (Up + Left)
         if keys[pygame.K_a] and keys[pygame.K_w]:
-            next_dir = 'UPLEFT'
             if curr_dir != 'DOWNRIGHT':
                 x_move = -BOXSIZE
                 y_move = -BOXSIZE
@@ -188,7 +192,6 @@ def game_logic():
             print(curr_dir)
         # Southwest (Down + Left)
         elif keys[pygame.K_a] and keys[pygame.K_s]:
-            next_dir = 'DOWNLEFT'
             if curr_dir != 'UPRIGHT':
                 x_move = -BOXSIZE
                 y_move = BOXSIZE
@@ -196,7 +199,6 @@ def game_logic():
             print(curr_dir)
         # Northeast (Up + Right)
         elif keys[pygame.K_d] and keys[pygame.K_w]:
-            next_dir = 'UPRIGHT'
             if curr_dir != 'DOWNLEFT':
                 x_move = BOXSIZE
                 y_move = -BOXSIZE
@@ -204,7 +206,6 @@ def game_logic():
             print(curr_dir)
         # Southeast (Down + Right)
         elif keys[pygame.K_d] and keys[pygame.K_s]:
-            next_dir = 'DOWNRIGHT'
             if curr_dir != 'UPLEFT':
                 x_move = BOXSIZE
                 y_move = BOXSIZE
@@ -212,7 +213,6 @@ def game_logic():
             print(curr_dir)
         # West (Left)
         elif keys[pygame.K_a]:
-            next_dir = 'LEFT'
             if curr_dir != 'RIGHT':
                 x_move = -BOXSIZE
                 y_move = 0
@@ -220,7 +220,6 @@ def game_logic():
             print(curr_dir)
         # East (Right)
         elif keys[pygame.K_d]:
-            next_dir = 'RIGHT'
             if curr_dir != 'LEFT':
                 x_move = BOXSIZE
                 y_move = 0
@@ -228,7 +227,6 @@ def game_logic():
             print(curr_dir)
         # North (Up)
         elif keys[pygame.K_w]:
-            next_dir = 'UP'
             if curr_dir != 'DOWN':
                 x_move = 0
                 y_move = -BOXSIZE
@@ -270,6 +268,8 @@ def game_logic():
         window.fill(BLACK)
         # Draws the point at its current location
         pygame.draw.rect(window, RED, [px_axis, py_axis, BOXSIZE, BOXSIZE])
+        if max_score >= 10:
+            pygame.draw.rect(window, CYAN, [npx_axis, npy_axis, BOXSIZE, BOXSIZE])
         # Draws the snake's body
         for part in body:
             pygame.draw.rect(window, GRAY, [part[0], part[1], BOXSIZE, BOXSIZE])
@@ -285,17 +285,26 @@ def game_logic():
             px_axis = random.randrange(1, (WINWIDTH // BOXSIZE)) * BOXSIZE
             py_axis = random.randrange(1, (WINHEIGHT // BOXSIZE)) * BOXSIZE
             score += 1
-
+            if score > max_score:
+                max_score = score
             # Used in incrementing scoreline down below
-            if score % 5 == 0:
+            if max_score % 5 == 0:
                 increment = True
             print('New Point at: (' + str(px_axis) + ', ' + str(py_axis) + ')')
+            print('Score: ' + str(score))
+
+        # Non-Point updater + storage, finds new location for next non-point
+        # TODO: Spawn in new location after x seconds ?
+        if x_axis == npx_axis and y_axis == npy_axis:
+            npx_axis = random.randrange(1, (WINWIDTH // BOXSIZE)) * BOXSIZE
+            npy_axis = random.randrange(1, (WINHEIGHT // BOXSIZE)) * BOXSIZE
+            score -= 1
             print('Score: ' + str(score))
 
         # Handles game speed
         # TODO: Increment FPS based on points/settings to mimic difficulty increase ?
         # Temporary solution: Increments fps by 5 every 5 points (not going to stay but pushing for fun)
-        if score % 5 == 0 and increment:
+        if max_score % 5 == 0 and increment:
             difftick += 5
             print('FPS: ' + str(difftick))
             increment = False

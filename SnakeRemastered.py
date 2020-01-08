@@ -100,6 +100,8 @@ def title_card():
 
 # Display card for when the game ends non-abruptly
 def game_over(score):
+    print('Game Over.')
+
     # Boolean for checking parts of loops
     mouse_click = False
 
@@ -140,6 +142,8 @@ def game_over(score):
 # Handles the game's mechanics and graphics
 # TODO: Split into smaller functions
 def game_logic():
+    print('Good luck!')
+
     # The variables for the snake head, current pos and moving pos
     x_axis = WINWIDTH / 2
     x_move = 0
@@ -149,12 +153,19 @@ def game_logic():
     # Holds the snake's body (including head)
     body = []
     score = 0
+
+    # Used for fps incrementer
     difftick = TICK
     increment = False
+
+    # Used for direction handling
+    curr_dir = 'STOP'
+    next_dir = 'STOP'
 
     # Stands for point x/y_axis, spawns initial point
     px_axis = random.randrange(1, (WINWIDTH / BOXSIZE)) * BOXSIZE
     py_axis = random.randrange(1, (WINHEIGHT / BOXSIZE)) * BOXSIZE
+    print('Point at: (' + str(px_axis) + ', ' + str(py_axis) + ')')
 
     # Main loop for game, controls hitboxes, graphics, and keypresses
     while True:
@@ -169,36 +180,68 @@ def game_logic():
         keys = pygame.key.get_pressed()
         # Northwest (Up + Left)
         if keys[pygame.K_a] and keys[pygame.K_w]:
-            x_move = -BOXSIZE
-            y_move = -BOXSIZE
+            next_dir = 'UPLEFT'
+            if curr_dir != 'DOWNRIGHT':
+                x_move = -BOXSIZE
+                y_move = -BOXSIZE
+                curr_dir = 'UPLEFT'
+            print(curr_dir)
         # Southwest (Down + Left)
         elif keys[pygame.K_a] and keys[pygame.K_s]:
-            x_move = -BOXSIZE
-            y_move = BOXSIZE
+            next_dir = 'DOWNLEFT'
+            if curr_dir != 'UPRIGHT':
+                x_move = -BOXSIZE
+                y_move = BOXSIZE
+                curr_dir = 'DOWNLEFT'
+            print(curr_dir)
         # Northeast (Up + Right)
         elif keys[pygame.K_d] and keys[pygame.K_w]:
-            x_move = BOXSIZE
-            y_move = -BOXSIZE
+            next_dir = 'UPRIGHT'
+            if curr_dir != 'DOWNLEFT':
+                x_move = BOXSIZE
+                y_move = -BOXSIZE
+                curr_dir = 'UPRIGHT'
+            print(curr_dir)
         # Southeast (Down + Right)
         elif keys[pygame.K_d] and keys[pygame.K_s]:
-            x_move = BOXSIZE
-            y_move = BOXSIZE
+            next_dir = 'DOWNRIGHT'
+            if curr_dir != 'UPLEFT':
+                x_move = BOXSIZE
+                y_move = BOXSIZE
+                curr_dir = 'DOWNRIGHT'
+            print(curr_dir)
         # West (Left)
         elif keys[pygame.K_a]:
-            x_move = -BOXSIZE
-            y_move = 0
+            next_dir = 'LEFT'
+            if curr_dir != 'RIGHT':
+                x_move = -BOXSIZE
+                y_move = 0
+                curr_dir = 'LEFT'
+            print(curr_dir)
         # East (Right)
         elif keys[pygame.K_d]:
-            x_move = BOXSIZE
-            y_move = 0
+            next_dir = 'RIGHT'
+            if curr_dir != 'LEFT':
+                x_move = BOXSIZE
+                y_move = 0
+                curr_dir = 'RIGHT'
+            print(curr_dir)
         # North (Up)
         elif keys[pygame.K_w]:
-            x_move = 0
-            y_move = -BOXSIZE
+            next_dir = 'UP'
+            if curr_dir != 'DOWN':
+                x_move = 0
+                y_move = -BOXSIZE
+                curr_dir = 'UP'
+            print(curr_dir)
         # South (Down)
         elif keys[pygame.K_s]:
-            x_move = 0
-            y_move = BOXSIZE
+            next_dir = 'DOWN'
+            if curr_dir != 'UP':
+                x_move = 0
+                y_move = BOXSIZE
+                curr_dir = 'DOWN'
+            print(curr_dir)
 
         # Hitbox checks, go out-of-bounds and the game ends
         if x_axis < 0 or x_axis >= WINWIDTH:
@@ -246,6 +289,7 @@ def game_logic():
             # Used in incrementing scoreline down below
             if score % 5 == 0:
                 increment = True
+            print('New Point at: (' + str(px_axis) + ', ' + str(py_axis) + ')')
             print('Score: ' + str(score))
 
         # Handles game speed
@@ -253,9 +297,9 @@ def game_logic():
         # Temporary solution: Increments fps by 5 every 5 points (not going to stay but pushing for fun)
         if score % 5 == 0 and increment:
             difftick += 5
+            print('FPS: ' + str(difftick))
             increment = False
         fps.tick(difftick)
-        print(difftick)
 
 
 # TODO: Better way to start the game

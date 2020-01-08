@@ -10,6 +10,8 @@ import sys
 WINWIDTH = 720
 WINHEIGHT = 480
 BOXSIZE = 10
+FONTSIZE = 18
+WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (192, 192, 192)
 RED = (255, 0, 0)
@@ -22,9 +24,10 @@ if precond[1] > 0:
 else:
     print('Game initialized.')
 
-# Builds the display window + fps timer
+# Builds the display window + other necessary tools
 window = pygame.display.set_mode((WINWIDTH, WINHEIGHT))
 pygame.display.set_caption('Snake Remastered')
+font = pygame.font.SysFont('timesnewroman', FONTSIZE)
 fps = pygame.time.Clock()
 
 
@@ -35,10 +38,17 @@ def game_end():
     pygame.quit()
     sys.exit()
 
+# Pushes score to display
+def display_score(score):
+    curr_score = font.render('Score: ' + str(score), True, WHITE)
+    window.blit(curr_score, [0, 0])
+
 
 # Handles the game's mechanics and graphics
 # TODO: Split into smaller functions
 def game_logic():
+    list = pygame.font.get_fonts()
+    print(list)
     # The variables for the snake head, current pos and moving pos
     x_axis = WINWIDTH / 2
     x_move = 0
@@ -128,6 +138,9 @@ def game_logic():
         # Draws the snake's body
         for part in body:
             pygame.draw.rect(window, GRAY, [part[0], part[1], BOXSIZE, BOXSIZE])
+
+        # Score display
+        display_score(score)
 
         # Refreshes the display with new changes
         pygame.display.update()

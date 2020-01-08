@@ -2,15 +2,21 @@
 # By: Isaac Castaneda
 # Taking the classic game "Snake" and throwing in new
 # features for experimental purposes.
-import pygame
+
 import random
 import sys
+import pygame
 
 # GAME CONSTANTS
 WINWIDTH = 720
 WINHEIGHT = 480
+
 BOXSIZE = 10
 FONTSIZE = 18
+TFONTSIZE = 54
+OFFSET = 100
+TICK = 10
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (192, 192, 192)
@@ -38,17 +44,102 @@ def game_end():
     pygame.quit()
     sys.exit()
 
+
 # Pushes score to display
 def display_score(score):
     curr_score = font.render('Score: ' + str(score), True, WHITE)
     window.blit(curr_score, [0, 0])
 
 
+# Display card for when the game starts
+def title_card():
+    # Booleans for checking parts of loops
+    mouse_click = False
+    show_title = True
+
+    # Creating all text boxes using similar font
+    tfont = pygame.font.SysFont('timesnewroman', TFONTSIZE)
+    title = tfont.render('Snake Remastered', True, WHITE)
+    title_off = tfont.render('Snake Remastered', True, GRAY)
+    click = font.render('Click Anywhere to Play!', True, WHITE)
+
+    # Positions text boxes on display with proper distance
+    window_rect = window.get_rect()
+    title_rect = title.get_rect()
+    click_rect = click.get_rect()
+    title_rect.centerx = window_rect.centerx
+    title_rect.centery = window_rect.centery - OFFSET
+    click_rect.centerx = window_rect.centerx
+    click_rect.centery = window_rect.centery + OFFSET
+
+    # Flashing text loop, ends if mouse click is registered
+    while not mouse_click:
+        # Ends game if exited, moves to game if clicked on
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_end()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_click = True
+
+        # Sets up static part of display
+        fps.tick(TICK)
+        window.fill(BLACK)
+        window.blit(click, click_rect)
+
+        # Alternates between on and off using timer with delay
+        if show_title:
+            window.blit(title, title_rect)
+            show_title = False
+            pygame.time.delay(500)
+        else:
+            window.blit(title_off, title_rect)
+            show_title = True
+            pygame.time.delay(500)
+        pygame.display.update()
+
+
+# Display card for when the game ends non-abruptly
+def game_over(score):
+    # Boolean for checking parts of loops
+    mouse_click = False
+
+    # Creating all text boxes using similar font
+    tfont = pygame.font.SysFont('timesnewroman', TFONTSIZE)
+    defeat = tfont.render('Game Over! Score: ' + str(score), True, WHITE)
+    click = font.render('Click to Play Again!', True, WHITE)
+
+    # Positions text boxes on display with proper distance
+    window_rect = window.get_rect()
+    defeat_rect = defeat.get_rect()
+    click_rect = click.get_rect()
+    defeat_rect.centerx = window_rect.centerx
+    defeat_rect.centery = window_rect.centery - OFFSET
+    click_rect.centerx = window_rect.centerx
+    click_rect.centery = window_rect.centery + OFFSET
+
+    # Displays text until mouse is clicked for new game
+    while not mouse_click:
+        # Ends game if exited, moves to game if clicked on
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_end()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_click = True
+
+        # Sets up static part of display
+        fps.tick(TICK)
+        window.fill(BLACK)
+        window.blit(defeat, defeat_rect)
+        window.blit(click, click_rect)
+        pygame.display.update()
+
+    # If this is reached, start a new game
+    game_logic()
+
+
 # Handles the game's mechanics and graphics
 # TODO: Split into smaller functions
 def game_logic():
-    list = pygame.font.get_fonts()
-    print(list)
     # The variables for the snake head, current pos and moving pos
     x_axis = WINWIDTH / 2
     x_move = 0
@@ -57,7 +148,6 @@ def game_logic():
 
     # Holds the snake's body (including head)
     body = []
-    # TODO: Broadcast this variable to display
     score = 0
 
     # Stands for point x/y_axis, spawns initial point
@@ -110,9 +200,9 @@ def game_logic():
 
         # Hitbox checks, go out-of-bounds and the game ends
         if x_axis < 0 or x_axis >= WINWIDTH:
-            game_end()
+            game_over(score)
         if y_axis < 0 or y_axis >= WINHEIGHT:
-            game_end()
+            game_over(score)
 
         # Sets new head coordinates
         x_axis += x_move
@@ -129,7 +219,7 @@ def game_logic():
         # Hitbox check, ensures head does not hit the body or ends game
         for part in body[:-1]:
             if part == head:
-                game_end()
+                game_over(score)
 
         # Resets the canvas to replicate movement of the pieces
         window.fill(BLACK)
@@ -154,8 +244,9 @@ def game_logic():
 
         # Handles game speed
         # TODO: Increment FPS based on points/settings to mimic difficulty increase ?
-        fps.tick(10)
+        fps.tick(TICK)
 
 
 # TODO: Better way to start the game
+title_card()
 game_logic()
